@@ -27,17 +27,18 @@ import com.example.android.testing.notes.util.EspressoIdlingResource;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.android.testing.notes.NotesApp;
+import com.example.android.testing.notes.base.BaseFragment;
 /**
  * Main UI for the note detail screen.
  */
-public class NoteDetailFragment extends Fragment implements NoteDetailContract.View {
+public class NoteDetailFragment extends BaseFragment implements NoteDetailContract.View {
 
     public static final String ARGUMENT_NOTE_ID = "NOTE_ID";
 

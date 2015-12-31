@@ -34,7 +34,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -45,6 +44,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.android.testing.notes.NotesApp;
+import com.example.android.testing.notes.base.BaseFragment;
 import java.io.IOException;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -53,7 +54,7 @@ import static com.google.common.base.Preconditions.checkState;
  * Main UI for the add note screen. Users can enter a note title and description. Images can be
  * added to notes by clicking on the options menu.
  */
-public class AddNoteFragment extends Fragment implements AddNoteContract.View {
+public class AddNoteFragment extends BaseFragment implements AddNoteContract.View {
 
     public static final int REQUEST_CODE_IMAGE_CAPTURE = 0x1001;
 

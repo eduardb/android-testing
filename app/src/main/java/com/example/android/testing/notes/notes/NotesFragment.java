@@ -29,7 +29,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
@@ -39,6 +38,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.example.android.testing.notes.NotesApp;
+import com.example.android.testing.notes.base.BaseFragment;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,7 +48,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Display a grid of {@link Note}s
  */
-public class NotesFragment extends Fragment implements NotesContract.View {
+public class NotesFragment extends BaseFragment implements NotesContract.View {
 
     private static final int REQUEST_ADD_NOTE = 1;
 
