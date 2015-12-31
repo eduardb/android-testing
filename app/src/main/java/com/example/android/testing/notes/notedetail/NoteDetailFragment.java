@@ -16,15 +16,6 @@
 
 package com.example.android.testing.notes.notedetail;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.GlideDrawableImageViewTarget;
-import com.example.android.testing.notes.Injection;
-import com.example.android.testing.notes.R;
-import com.example.android.testing.notes.util.EspressoIdlingResource;
-
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -33,8 +24,16 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.GlideDrawableImageViewTarget;
 import com.example.android.testing.notes.NotesApp;
+import com.example.android.testing.notes.R;
 import com.example.android.testing.notes.base.BaseFragment;
+import com.example.android.testing.notes.util.EspressoIdlingResource;
+
 /**
  * Main UI for the note detail screen.
  */
@@ -61,8 +60,16 @@ public class NoteDetailFragment extends BaseFragment implements NoteDetailContra
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mActionsListener = new NoteDetailPresenter(Injection.provideNotesRepository(),
-                this);
+        mActionsListener = NotesApp.get(getContext())
+                .appComponent()
+                .plus(new NoteDetailModule(this))
+                .getUserActionsListener();
+    }
+
+    @Override
+    public void onDestroy() {
+        mActionsListener = null;
+        super.onDestroy();
     }
 
     @Nullable

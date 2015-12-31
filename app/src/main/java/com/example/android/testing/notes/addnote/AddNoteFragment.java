@@ -16,15 +16,6 @@
 
 package com.example.android.testing.notes.addnote;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.GlideDrawableImageViewTarget;
-import com.example.android.testing.notes.Injection;
-import com.example.android.testing.notes.R;
-import com.example.android.testing.notes.util.EspressoIdlingResource;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
@@ -44,8 +35,16 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.GlideDrawableImageViewTarget;
 import com.example.android.testing.notes.NotesApp;
+import com.example.android.testing.notes.R;
 import com.example.android.testing.notes.base.BaseFragment;
+import com.example.android.testing.notes.util.EspressoIdlingResource;
+
 import java.io.IOException;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -77,8 +76,10 @@ public class AddNoteFragment extends BaseFragment implements AddNoteContract.Vie
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mActionListener = new AddNotePresenter(Injection.provideNotesRepository(), this,
-                Injection.provideImageFile());
+        mActionListener = NotesApp.get(getContext())
+                .appComponent()
+                .plus(new AddNoteModule(this))
+                .getUserActionsListener();
 
         FloatingActionButton fab =
                 (FloatingActionButton) getActivity().findViewById(R.id.fab_add_notes);

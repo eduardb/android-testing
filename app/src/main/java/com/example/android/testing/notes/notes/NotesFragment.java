@@ -16,12 +16,6 @@
 
 package com.example.android.testing.notes.notes;
 
-import com.example.android.testing.notes.Injection;
-import com.example.android.testing.notes.addnote.AddNoteActivity;
-import com.example.android.testing.notes.notedetail.NoteDetailActivity;
-import com.example.android.testing.notes.R;
-import com.example.android.testing.notes.data.Note;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -39,7 +33,12 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.android.testing.notes.NotesApp;
+import com.example.android.testing.notes.R;
+import com.example.android.testing.notes.addnote.AddNoteActivity;
 import com.example.android.testing.notes.base.BaseFragment;
+import com.example.android.testing.notes.data.Note;
+import com.example.android.testing.notes.notedetail.NoteDetailActivity;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -82,8 +81,17 @@ public class NotesFragment extends BaseFragment implements NotesContract.View {
 
         setRetainInstance(true);
 
-        mActionsListener = new NotesPresenter(Injection.provideNotesRepository(), this);
+        mActionsListener = NotesApp.get(getContext())
+                .appComponent()
+                .plus(new NotesModule(this))
+                .getUserActionsListener();
 
+    }
+
+    @Override
+    public void onDestroy() {
+        mActionsListener = null;
+        super.onDestroy();
     }
 
     @Override
