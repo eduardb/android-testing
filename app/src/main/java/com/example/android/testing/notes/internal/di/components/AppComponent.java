@@ -1,12 +1,8 @@
 package com.example.android.testing.notes.internal.di.components;
 
-import com.example.android.testing.notes.addnote.AddNoteComponent;
-import com.example.android.testing.notes.addnote.AddNoteModule;
+import com.example.android.testing.notes.data.NotesRepository;
 import com.example.android.testing.notes.internal.di.modules.AppModule;
-import com.example.android.testing.notes.notedetail.NoteDetailComponent;
-import com.example.android.testing.notes.notedetail.NoteDetailModule;
-import com.example.android.testing.notes.notes.NotesComponent;
-import com.example.android.testing.notes.notes.NotesModule;
+import com.example.android.testing.notes.util.ImageFile;
 
 import javax.inject.Singleton;
 
@@ -18,7 +14,7 @@ import dagger.Component;
 @Singleton
 @Component(modules = AppModule.class)
 public interface AppComponent {
-    AddNoteComponent plus(AddNoteModule addNoteModule);
-    NoteDetailComponent plus(NoteDetailModule noteDetailModule);
-    NotesComponent plus(NotesModule notesModule);
+    //Exposed to sub-graphs.
+    ImageFile imageFile();
+    NotesRepository notesRepository();
 }

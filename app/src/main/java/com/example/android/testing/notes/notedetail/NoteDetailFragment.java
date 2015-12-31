@@ -60,9 +60,10 @@ public class NoteDetailFragment extends BaseFragment implements NoteDetailContra
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mActionsListener = NotesApp.get(getContext())
-                .appComponent()
-                .plus(new NoteDetailModule(this))
+        mActionsListener = DaggerNoteDetailComponent.builder()
+                .appComponent(NotesApp.get(getContext()).appComponent())
+                .noteDetailModule(new NoteDetailModule(this))
+                .build()
                 .getUserActionsListener();
     }
 

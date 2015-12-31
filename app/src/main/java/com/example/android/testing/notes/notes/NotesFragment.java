@@ -81,11 +81,11 @@ public class NotesFragment extends BaseFragment implements NotesContract.View {
 
         setRetainInstance(true);
 
-        mActionsListener = NotesApp.get(getContext())
-                .appComponent()
-                .plus(new NotesModule(this))
+        mActionsListener = DaggerNotesComponent.builder()
+                .appComponent(NotesApp.get(getContext()).appComponent())
+                .notesModule(new NotesModule(this))
+                .build()
                 .getUserActionsListener();
-
     }
 
     @Override

@@ -76,9 +76,10 @@ public class AddNoteFragment extends BaseFragment implements AddNoteContract.Vie
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mActionListener = NotesApp.get(getContext())
-                .appComponent()
-                .plus(new AddNoteModule(this))
+        mActionListener = DaggerAddNoteComponent.builder()
+                .appComponent(NotesApp.get(getContext()).appComponent())
+                .addNoteModule(new AddNoteModule(this))
+                .build()
                 .getUserActionsListener();
 
         FloatingActionButton fab =
