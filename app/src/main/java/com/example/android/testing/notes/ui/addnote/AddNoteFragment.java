@@ -17,6 +17,7 @@
 package com.example.android.testing.notes.ui.addnote;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -74,12 +75,18 @@ public class AddNoteFragment extends BaseFragment implements AddNoteContract.Vie
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        mActionListener = NotesApp.get(getContext())
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mActionListener = NotesApp.get(context)
                 .appComponent()
                 .plus(new AddNoteModule(this))
                 .getUserActionsListener();
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        mActionListener.wakeUp();
 
         FloatingActionButton fab =
                 (FloatingActionButton) getActivity().findViewById(R.id.fab_add_notes);
@@ -105,6 +112,19 @@ public class AddNoteFragment extends BaseFragment implements AddNoteContract.Vie
         setHasOptionsMenu(true);
         setRetainInstance(true);
         return root;
+    }
+
+    @Override
+    public void onDestroyView() {
+        mActionListener.sleep();
+        super.onDestroyView();
+    }
+
+    @Override
+    public void onDestroy() {
+        mActionListener.destroy();
+        mActionListener = null;
+        super.onDestroy();
     }
 
     @Override

@@ -18,14 +18,16 @@ package com.example.android.testing.notes.ui.addnote;
 
 import android.support.annotation.NonNull;
 
+import com.example.android.testing.notes.base.BaseContract;
+
 import java.io.IOException;
 
 /**
  * This specifies the contract between the view and the presenter.
  */
-public interface AddNoteContract {
+public interface AddNoteContract extends BaseContract {
 
-    interface View {
+    interface View extends BaseContract.View {
 
         void showEmptyNoteError();
 
@@ -40,7 +42,7 @@ public interface AddNoteContract {
         void setUserActionListener(UserActionsListener listener);
     }
 
-    interface UserActionsListener {
+    interface UserActionsListener extends BaseContract.UserActionsListener {
 
         void saveNote(String title, String description);
 

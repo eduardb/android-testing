@@ -2,9 +2,9 @@ package com.example.android.testing.notes.ui.addnote;
 
 import android.support.annotation.NonNull;
 
-import com.example.android.testing.notes.ui.addnote.AddNoteContract.UserActionsListener;
 import com.example.android.testing.notes.data.NotesRepository;
 import com.example.android.testing.notes.internal.di.ViewScope;
+import com.example.android.testing.notes.ui.addnote.AddNoteContract.UserActionsListener;
 import com.example.android.testing.notes.util.ImageFile;
 
 import dagger.Module;

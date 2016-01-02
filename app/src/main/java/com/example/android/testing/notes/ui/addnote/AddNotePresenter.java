@@ -16,6 +16,7 @@
 
 package com.example.android.testing.notes.ui.addnote;
 
+import com.example.android.testing.notes.base.RxPresenter;
 import com.example.android.testing.notes.data.Note;
 import com.example.android.testing.notes.data.NotesRepository;
 import com.example.android.testing.notes.util.ImageFile;
@@ -32,20 +33,19 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Listens to user actions from the UI ({@link AddNoteFragment}), retrieves the data and updates
  * the UI as required.
  */
-public class AddNotePresenter implements AddNoteContract.UserActionsListener {
+public class AddNotePresenter extends RxPresenter<AddNoteContract.View>
+        implements AddNoteContract.UserActionsListener {
 
     @NonNull
     private final NotesRepository mNotesRepository;
-    @NonNull
-    private final AddNoteContract.View mAddNoteView;
     @NonNull
     private final ImageFile mImageFile;
 
     public AddNotePresenter(@NonNull NotesRepository notesRepository,
                             @NonNull AddNoteContract.View addNoteView,
                             @NonNull ImageFile imageFile) {
+        super(addNoteView);
         mNotesRepository = checkNotNull(notesRepository);
-        mAddNoteView = checkNotNull(addNoteView);
         addNoteView.setUserActionListener(this);
         mImageFile = imageFile;
     }
@@ -58,10 +58,10 @@ public class AddNotePresenter implements AddNoteContract.UserActionsListener {
         }
         Note newNote = new Note(title, description, imageUrl);
         if (newNote.isEmpty()) {
-            mAddNoteView.showEmptyNoteError();
+            getView().showEmptyNoteError();
         } else {
             mNotesRepository.saveNote(newNote);
-            mAddNoteView.showNotesList();
+            getView().showNotesList();
         }
     }
 
@@ -70,13 +70,13 @@ public class AddNotePresenter implements AddNoteContract.UserActionsListener {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
         mImageFile.create(imageFileName, ".jpg");
-        mAddNoteView.openCamera(mImageFile.getPath());
+        getView().openCamera(mImageFile.getPath());
     }
 
     @Override
     public void imageAvailable() {
         if (mImageFile.exists()) {
-            mAddNoteView.showImagePreview(mImageFile.getPath());
+            getView().showImagePreview(mImageFile.getPath());
         } else {
             imageCaptureFailed();
         }
@@ -89,7 +89,7 @@ public class AddNotePresenter implements AddNoteContract.UserActionsListener {
 
     private void captureFailed() {
         mImageFile.delete();
-        mAddNoteView.showImageError();
+        getView().showImageError();
     }
 
 }
