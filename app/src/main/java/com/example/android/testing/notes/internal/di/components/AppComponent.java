@@ -1,12 +1,12 @@
 package com.example.android.testing.notes.internal.di.components;
 
-import com.example.android.testing.notes.addnote.AddNoteComponent;
-import com.example.android.testing.notes.addnote.AddNoteModule;
+import com.example.android.testing.notes.ui.addnote.AddNoteComponent;
+import com.example.android.testing.notes.ui.addnote.AddNoteModule;
 import com.example.android.testing.notes.internal.di.modules.AppModule;
-import com.example.android.testing.notes.notedetail.NoteDetailComponent;
-import com.example.android.testing.notes.notedetail.NoteDetailModule;
-import com.example.android.testing.notes.notes.NotesComponent;
-import com.example.android.testing.notes.notes.NotesModule;
+import com.example.android.testing.notes.ui.notedetail.NoteDetailComponent;
+import com.example.android.testing.notes.ui.notedetail.NoteDetailModule;
+import com.example.android.testing.notes.ui.notes.NotesComponent;
+import com.example.android.testing.notes.ui.notes.NotesModule;
 
 import javax.inject.Singleton;
 

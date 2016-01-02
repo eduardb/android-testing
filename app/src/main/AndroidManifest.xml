@@ -29,16 +29,16 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-                android:name=".notes.NotesActivity"
+                android:name=".ui.notes.NotesActivity"
                 android:theme="@style/AppTheme.OverlapSystemBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".notedetail.NoteDetailActivity" />
-        <activity android:name=".addnote.AddNoteActivity" />
-        <activity android:name=".statistics.StatisticsActivity" />
+        <activity android:name=".ui.notedetail.NoteDetailActivity" />
+        <activity android:name=".ui.addnote.AddNoteActivity" />
+        <activity android:name=".ui.statistics.StatisticsActivity" />
     </application>
 
 </manifest>
