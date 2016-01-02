@@ -18,12 +18,14 @@ package com.example.android.testing.notes.ui.notedetail;
 
 import android.support.annotation.Nullable;
 
+import com.example.android.testing.notes.base.BaseContract;
+
 /**
  * This specifies the contract between the view and the presenter.
  */
-public interface NoteDetailContract {
+public interface NoteDetailContract extends BaseContract {
 
-    interface View {
+    interface View extends BaseContract.View {
 
         void setProgressIndicator(boolean active);
 
@@ -42,7 +44,7 @@ public interface NoteDetailContract {
         void showDescription(String description);
     }
 
-    interface UserActionsListener {
+    interface UserActionsListener extends BaseContract.UserActionsListener {
 
         void openNote(@Nullable String noteId);
     }

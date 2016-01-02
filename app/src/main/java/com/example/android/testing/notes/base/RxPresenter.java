@@ -8,6 +8,8 @@ import rx.Subscription;
 import rx.subjects.BehaviorSubject;
 import rx.subscriptions.CompositeSubscription;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Represents the Presenter of the popular Model-View-Presenter design pattern.
  * <p/>
@@ -28,7 +30,7 @@ public abstract class RxPresenter<V extends BaseContract.View>
     private BehaviorSubject<Boolean> mViewReady = BehaviorSubject.create(false);
 
     public RxPresenter(@NonNull final V view) {
-        mView = view;
+        mView = checkNotNull(view, "view cannot be null!");
     }
 
     /**

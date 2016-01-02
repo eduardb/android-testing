@@ -64,6 +64,15 @@ public class NotesFragment extends BaseFragment implements NotesContract.View {
     }
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mActionsListener = NotesApp.get(context)
+                .appComponent()
+                .plus(new NotesModule(this))
+                .getUserActionsListener();
+    }
+
+    @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mListAdapter = new NotesAdapter(new ArrayList<Note>(0), mItemListener);
@@ -81,17 +90,20 @@ public class NotesFragment extends BaseFragment implements NotesContract.View {
 
         setRetainInstance(true);
 
-        mActionsListener = NotesApp.get(getContext())
-                .appComponent()
-                .plus(new NotesModule(this))
-                .getUserActionsListener();
-
+        mActionsListener.wakeUp();
     }
 
     @Override
     public void onDestroy() {
+        mActionsListener.destroy();
         mActionsListener = null;
         super.onDestroy();
+    }
+
+    @Override
+    public void onDestroyView() {
+        mActionsListener.sleep();
+        super.onDestroyView();
     }
 
     @Override

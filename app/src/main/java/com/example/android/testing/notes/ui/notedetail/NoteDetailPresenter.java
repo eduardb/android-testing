@@ -16,6 +16,7 @@
 
 package com.example.android.testing.notes.ui.notedetail;
 
+import com.example.android.testing.notes.base.RxPresenter;
 import com.example.android.testing.notes.data.Note;
 import com.example.android.testing.notes.data.NotesRepository;
 
@@ -28,32 +29,31 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Listens to user actions from the UI ({@link NoteDetailFragment}), retrieves the data and updates
  * the UI as required.
  */
-public class NoteDetailPresenter implements NoteDetailContract.UserActionsListener {
+public class NoteDetailPresenter extends RxPresenter<NoteDetailContract.View>
+        implements NoteDetailContract.UserActionsListener {
 
     private final NotesRepository mNotesRepository;
 
-    private final NoteDetailContract.View mNotesDetailView;
-
     public NoteDetailPresenter(@NonNull NotesRepository notesRepository,
                                @NonNull NoteDetailContract.View noteDetailView) {
+        super(noteDetailView);
         mNotesRepository = checkNotNull(notesRepository, "notesRepository cannot be null!");
-        mNotesDetailView = checkNotNull(noteDetailView, "noteDetailView cannot be null!");
     }
 
     @Override
     public void openNote(@Nullable String noteId) {
         if (null == noteId || noteId.isEmpty()) {
-            mNotesDetailView.showMissingNote();
+            getView().showMissingNote();
             return;
         }
 
-        mNotesDetailView.setProgressIndicator(true);
+        getView().setProgressIndicator(true);
         mNotesRepository.getNote(noteId, new NotesRepository.GetNoteCallback() {
             @Override
             public void onNoteLoaded(Note note) {
-                mNotesDetailView.setProgressIndicator(false);
+                getView().setProgressIndicator(false);
                 if (null == note) {
-                    mNotesDetailView.showMissingNote();
+                    getView().showMissingNote();
                 } else {
                     showNote(note);
                 }
@@ -67,21 +67,21 @@ public class NoteDetailPresenter implements NoteDetailContract.UserActionsListen
         String imageUrl = note.getImageUrl();
 
         if (title != null && title.isEmpty()) {
-            mNotesDetailView.hideTitle();
+            getView().hideTitle();
         } else {
-            mNotesDetailView.showTitle(title);
+            getView().showTitle(title);
         }
 
         if (description != null && description.isEmpty()) {
-            mNotesDetailView.hideDescription();
+            getView().hideDescription();
         } else {
-            mNotesDetailView.showDescription(description);
+            getView().showDescription(description);
         }
 
         if (imageUrl != null) {
-            mNotesDetailView.showImage(imageUrl);
+            getView().showImage(imageUrl);
         } else {
-            mNotesDetailView.hideImage();
+            getView().hideImage();
         }
 
     }

@@ -16,6 +16,7 @@
 
 package com.example.android.testing.notes.ui.notedetail;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -58,16 +59,23 @@ public class NoteDetailFragment extends BaseFragment implements NoteDetailContra
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        mActionsListener = NotesApp.get(getContext())
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mActionsListener = NotesApp.get(context)
                 .appComponent()
                 .plus(new NoteDetailModule(this))
                 .getUserActionsListener();
     }
 
     @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        mActionsListener.wakeUp();
+    }
+
+    @Override
     public void onDestroy() {
+        mActionsListener.destroy();
         mActionsListener = null;
         super.onDestroy();
     }
@@ -88,6 +96,12 @@ public class NoteDetailFragment extends BaseFragment implements NoteDetailContra
         super.onResume();
         String noteId = getArguments().getString(ARGUMENT_NOTE_ID);
         mActionsListener.openNote(noteId);
+    }
+
+    @Override
+    public void onDestroyView() {
+        mActionsListener.sleep();
+        super.onDestroyView();
     }
 
     @Override

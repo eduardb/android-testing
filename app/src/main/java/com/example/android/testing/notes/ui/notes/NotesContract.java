@@ -18,6 +18,7 @@ package com.example.android.testing.notes.ui.notes;
 
 import android.support.annotation.NonNull;
 
+import com.example.android.testing.notes.base.BaseContract;
 import com.example.android.testing.notes.data.Note;
 
 import java.util.List;
@@ -25,9 +26,9 @@ import java.util.List;
 /**
  * This specifies the contract between the view and the presenter.
  */
-public interface NotesContract {
+public interface NotesContract extends BaseContract {
 
-    interface View {
+    interface View extends BaseContract.View {
 
         void setProgressIndicator(boolean active);
 
@@ -38,7 +39,7 @@ public interface NotesContract {
         void showNoteDetailUi(String noteId);
     }
 
-    interface UserActionsListener {
+    interface UserActionsListener extends BaseContract.UserActionsListener {
 
         void loadNotes(boolean forceUpdate);
 
