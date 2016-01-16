@@ -58,11 +58,11 @@ public class AddNoteFragment extends BaseFragment implements AddNoteContract.Vie
 
     public static final int REQUEST_CODE_IMAGE_CAPTURE = 0x1001;
 
-    private AddNoteContract.UserActionsListener mActionListener;
+    protected AddNoteContract.UserActionsListener mActionListener;
 
-    private TextView mTitle;
+    protected TextView mTitle;
 
-    private TextView mDescription;
+    protected TextView mDescription;
 
     private ImageView mImageThumbnail;
 

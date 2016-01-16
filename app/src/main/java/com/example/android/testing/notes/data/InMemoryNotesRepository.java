@@ -16,12 +16,15 @@
 
 package com.example.android.testing.notes.data;
 
-import com.google.common.collect.ImmutableList;
-
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 
+import com.google.common.collect.ImmutableList;
+
 import java.util.List;
+
+import rx.Observable;
+import rx.functions.Action1;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -44,40 +47,38 @@ public class InMemoryNotesRepository implements NotesRepository {
     }
 
     @Override
-    public void getNotes(@NonNull final LoadNotesCallback callback) {
-        checkNotNull(callback);
+    public Observable<List<Note>> getNotes() {
         // Load from API only if needed.
         if (mCachedNotes == null) {
-            mNotesServiceApi.getAllNotes(new NotesServiceApi.NotesServiceCallback<List<Note>>() {
-                @Override
-                public void onLoaded(List<Note> notes) {
-                    mCachedNotes = ImmutableList.copyOf(notes);
-                    callback.onNotesLoaded(mCachedNotes);
-                }
-            });
+            return mNotesServiceApi.getAllNotes()
+                    .doOnNext(new Action1<List<Note>>() {
+                        @Override
+                        public void call(List<Note> notes) {
+                            mCachedNotes = ImmutableList.copyOf(notes);
+                        }
+                    });
         } else {
-            callback.onNotesLoaded(mCachedNotes);
+            return Observable.just(mCachedNotes);
         }
     }
 
     @Override
-    public void saveNote(@NonNull Note note) {
+    public Observable<Note> saveNote(@NonNull Note note) {
         checkNotNull(note);
-        mNotesServiceApi.saveNote(note);
-        refreshData();
+        return mNotesServiceApi.saveNote(note)
+                .doOnNext(new Action1<Note>() {
+                    @Override
+                    public void call(Note note) {
+                        refreshData();
+                    }
+                });
     }
 
     @Override
-    public void getNote(@NonNull final String noteId, @NonNull final GetNoteCallback callback) {
+    public Observable<Note> getNote(@NonNull final String noteId) {
         checkNotNull(noteId);
-        checkNotNull(callback);
         // Load notes matching the id always directly from the API.
-        mNotesServiceApi.getNote(noteId, new NotesServiceApi.NotesServiceCallback<Note>() {
-            @Override
-            public void onLoaded(Note note) {
-                callback.onNoteLoaded(note);
-            }
-        });
+        return mNotesServiceApi.getNote(noteId);
     }
 
     @Override

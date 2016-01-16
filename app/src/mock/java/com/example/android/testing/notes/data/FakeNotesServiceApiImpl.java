@@ -16,12 +16,16 @@
 
 package com.example.android.testing.notes.data;
 
-import com.google.common.collect.Lists;
-
+import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 import android.support.v4.util.ArrayMap;
 
+import com.fernandocejas.frodo.annotation.RxLogObservable;
+import com.google.common.collect.Lists;
+
 import java.util.List;
+
+import rx.Observable;
 
 /**
  * Fake implementation of {@link NotesServiceApi} to inject a fake service in a hermetic test.
@@ -29,22 +33,27 @@ import java.util.List;
 public class FakeNotesServiceApiImpl implements NotesServiceApi {
 
     // TODO replace this with a new test specific data set.
-    private static final ArrayMap<String, Note> NOTES_SERVICE_DATA = new ArrayMap();
+    private static final ArrayMap<String, Note> NOTES_SERVICE_DATA = new ArrayMap<>();
 
+    @RxLogObservable
     @Override
-    public void getAllNotes(NotesServiceCallback<List<Note>> callback) {
-        callback.onLoaded(Lists.newArrayList(NOTES_SERVICE_DATA.values()));
+    public Observable<List<Note>> getAllNotes() {
+        final List<Note> notes = Lists.newArrayList(NOTES_SERVICE_DATA.values());
+        return Observable.just(notes);
     }
 
+    @RxLogObservable
     @Override
-    public void getNote(String noteId, NotesServiceCallback<Note> callback) {
+    public Observable<Note> getNote(String noteId) {
         Note note = NOTES_SERVICE_DATA.get(noteId);
-        callback.onLoaded(note);
+        return Observable.just(note);
     }
 
+    @RxLogObservable
     @Override
-    public void saveNote(Note note) {
+    public Observable<Note> saveNote(@NonNull Note note) {
         NOTES_SERVICE_DATA.put(note.getId(), note);
+        return Observable.just(note);
     }
 
     @VisibleForTesting

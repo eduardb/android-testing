@@ -16,24 +16,27 @@
 
 package com.example.android.testing.notes.data;
 
+import com.example.android.testing.notes.util.TestUtils;
 import com.google.common.collect.Lists;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.List;
 
+import rx.Observable;
+import rx.observers.TestSubscriber;
+
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for the implementation of the in-memory repository with cache.
@@ -50,19 +53,6 @@ public class InMemoryNotesRepositoryTest {
     @Mock
     private NotesServiceApiImpl mServiceApi;
 
-    @Mock
-    private NotesRepository.GetNoteCallback mGetNoteCallback;
-
-    @Mock
-    private NotesRepository.LoadNotesCallback mLoadNotesCallback;
-
-    /**
-     * {@link ArgumentCaptor} is a powerful Mockito API to capture argument values and use them to
-     * perform further actions or assertions on them.
-     */
-    @Captor
-    private ArgumentCaptor<NotesServiceApi.NotesServiceCallback> mNotesServiceCallbackCaptor;
-
     @Before
     public void setupNotesRepository() {
         // Mockito has a very convenient way to inject mocks by using the @Mock annotation. To
@@ -75,34 +65,46 @@ public class InMemoryNotesRepositoryTest {
 
     @Test
     public void getNotes_repositoryCachesAfterFirstApiCall() {
-        // Given a setup Captor to capture callbacks
         // When two calls are issued to the notes repository
-        twoLoadCallsToRepository(mLoadNotesCallback);
+        twoLoadCallsToRepository();
 
         // Then notes where only requested once from Service API
-        verify(mServiceApi).getAllNotes(any(NotesServiceApi.NotesServiceCallback.class));
+        verify(mServiceApi).getAllNotes();
     }
 
     @Test
     public void invalidateCache_DoesNotCallTheServiceApi() {
-        // Given a setup Captor to capture callbacks
-        twoLoadCallsToRepository(mLoadNotesCallback);
+        twoLoadCallsToRepository();
 
         // When data refresh is requested
         mNotesRepository.refreshData();
-        mNotesRepository.getNotes(mLoadNotesCallback); // Third call to API
+        final TestSubscriber<List<Note>> testSubscriber =
+                TestUtils.subscribeTest(mNotesRepository.getNotes()); // Third call to API
+
+        testSubscriber.assertNoErrors();
+        testSubscriber.assertValueCount(1);
+        testSubscriber.assertValue(NOTES);
+        testSubscriber.assertCompleted();
 
         // The notes where requested twice from the Service API (Caching on first and third call)
-        verify(mServiceApi, times(2)).getAllNotes(any(NotesServiceApi.NotesServiceCallback.class));
+        verify(mServiceApi, times(2)).getAllNotes();
     }
 
     @Test
     public void getNotes_requestsAllNotesFromServiceApi() {
+        when(mServiceApi.getAllNotes()).thenReturn(Observable.just(NOTES));
+
         // When notes are requested from the notes repository
-        mNotesRepository.getNotes(mLoadNotesCallback);
+        final TestSubscriber<List<Note>> testSubscriber =
+                TestUtils.subscribeTest(mNotesRepository.getNotes());
+
+        testSubscriber.assertNoErrors();
+        testSubscriber.assertValueCount(1);
+        testSubscriber.assertValue(NOTES);
+        testSubscriber.assertCompleted();
 
         // Then notes are loaded from the service API
-        verify(mServiceApi).getAllNotes(any(NotesServiceApi.NotesServiceCallback.class));
+        verify(mServiceApi).getAllNotes();
     }
 
     @Test
@@ -110,8 +112,16 @@ public class InMemoryNotesRepositoryTest {
         // Given a stub note with title and description
         Note newNote = new Note(NOTE_TITLE, "Some Note Description");
 
+        when(mServiceApi.saveNote(newNote)).thenReturn(Observable.just(newNote));
+
         // When a note is saved to the notes repository
-        mNotesRepository.saveNote(newNote);
+        final TestSubscriber<Note> testSubscriber =
+                TestUtils.subscribeTest(mNotesRepository.saveNote(newNote));
+
+        testSubscriber.assertNoErrors();
+        testSubscriber.assertValueCount(1);
+        testSubscriber.assertValue(newNote);
+        testSubscriber.assertCompleted();
 
         // Then the notes cache is cleared
         assertThat(mNotesRepository.mCachedNotes, is(nullValue()));
@@ -119,27 +129,48 @@ public class InMemoryNotesRepositoryTest {
 
     @Test
     public void getNote_requestsSingleNoteFromServiceApi() {
+        when(mServiceApi.getNote(anyString())).thenReturn(Observable.<Note>just(null));
+
         // When a note is requested from the notes repository
-        mNotesRepository.getNote(NOTE_TITLE, mGetNoteCallback);
+        final TestSubscriber<Note> testSubscriber =
+                TestUtils.subscribeTest(mNotesRepository.getNote(NOTE_TITLE));
+
+        testSubscriber.assertNoErrors();
+        testSubscriber.assertValueCount(1);
+        testSubscriber.assertValue(null);
+        testSubscriber.assertCompleted();
 
         // Then the note is loaded from the service API
-        verify(mServiceApi).getNote(eq(NOTE_TITLE), any(NotesServiceApi.NotesServiceCallback.class));
+        verify(mServiceApi).getNote(eq(NOTE_TITLE));
     }
 
     /**
      * Convenience method that issues two calls to the notes repository
      */
-    private void twoLoadCallsToRepository(NotesRepository.LoadNotesCallback callback) {
+    private void twoLoadCallsToRepository() {
+        when(mServiceApi.getAllNotes()).thenReturn(Observable.just(NOTES));
+
         // When notes are requested from repository
-        mNotesRepository.getNotes(callback); // First call to API
+        final TestSubscriber<List<Note>> testSubscriber1 =
+                TestUtils.subscribeTest(mNotesRepository.getNotes()); // First call to API
 
-        // Use the Mockito Captor to capture the callback
-        verify(mServiceApi).getAllNotes(mNotesServiceCallbackCaptor.capture());
+        // Verify that the notes were requested from Service API
+        verify(mServiceApi).getAllNotes();
 
-        // Trigger callback so notes are cached
-        mNotesServiceCallbackCaptor.getValue().onLoaded(NOTES);
+        testSubscriber1.assertNoErrors();
+        testSubscriber1.assertValueCount(1);
+        testSubscriber1.assertValue(NOTES);
+        testSubscriber1.assertCompleted();
 
-        mNotesRepository.getNotes(callback); // Second call to API
+        final TestSubscriber<List<Note>> testSubscriber2 =
+                TestUtils.subscribeTest(mNotesRepository.getNotes()); // Second call to API
+
+        // Verify that the notes were not longer requested from Service API
+        verify(mServiceApi).getAllNotes();
+
+        testSubscriber2.assertNoErrors();
+        testSubscriber2.assertValueCount(1);
+        testSubscriber2.assertValue(NOTES);
+        testSubscriber2.assertCompleted();
     }
-
 }

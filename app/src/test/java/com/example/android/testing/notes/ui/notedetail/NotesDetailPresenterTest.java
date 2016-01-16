@@ -16,23 +16,27 @@
 
 package com.example.android.testing.notes.ui.notedetail;
 
+import com.example.android.testing.notes.util.RxBaseTest;
 import com.example.android.testing.notes.data.Note;
 import com.example.android.testing.notes.data.NotesRepository;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+
+import rx.Observable;
 
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for the implementation of {@link NoteDetailPresenter}
  */
-public class NotesDetailPresenterTest {
+public class NotesDetailPresenterTest extends RxBaseTest {
 
     public static final String INVALID_ID = "INVALID_ID";
 
@@ -44,14 +48,7 @@ public class NotesDetailPresenterTest {
     private NotesRepository mNotesRepository;
 
     @Mock
-    private NoteDetailContract.View mNoteDetailView;
-
-    /**
-     * {@link ArgumentCaptor} is a powerful Mockito API to capture argument values and use them to
-     * perform further actions or assertions on them.
-     */
-    @Captor
-    private ArgumentCaptor<NotesRepository.GetNoteCallback> mGetNoteCallbackCaptor;
+    protected NoteDetailContract.View mNoteDetailView;
 
     private NoteDetailPresenter mNotesDetailsPresenter;
 
@@ -68,18 +65,25 @@ public class NotesDetailPresenterTest {
     @Test
     public void getNoteFromRepositoryAndLoadIntoView() {
         // Given an initialized NoteDetailPresenter with stubbed note
-        Note note = new Note(TITLE_TEST, DESCRIPTION_TEST);
+        final Note note = new Note(TITLE_TEST, DESCRIPTION_TEST);
+
+        // When note with given id is attempted to load from model
+        when(mNotesRepository.getNote(eq(note.getId()))).then(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                // Progress indicator is shown
+                verify(mNoteDetailView).setProgressIndicator(true);
+                return Observable.just(note);
+            }
+        });
 
         // When notes presenter is asked to open a note
         mNotesDetailsPresenter.openNote(note.getId());
 
-        // Then note is loaded from model, callback is captured and progress indicator is shown
-        verify(mNotesRepository).getNote(eq(note.getId()), mGetNoteCallbackCaptor.capture());
-        verify(mNoteDetailView).setProgressIndicator(true);
+        // Then note is loaded from model
+        verify(mNotesRepository).getNote(eq(note.getId()));
 
         // When note is finally loaded
-        mGetNoteCallbackCaptor.getValue().onNoteLoaded(note); // Trigger callback
-
         // Then progress indicator is hidden and title and description are shown in UI
         verify(mNoteDetailView).setProgressIndicator(false);
         verify(mNoteDetailView).showTitle(TITLE_TEST);
@@ -88,17 +92,23 @@ public class NotesDetailPresenterTest {
 
     @Test
     public void getUnknownNoteFromRepositoryAndLoadIntoView() {
+        // When note with invalid id is attempted to load from model
+        when(mNotesRepository.getNote(eq(INVALID_ID))).then(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                // Progress indicator is shown
+                verify(mNoteDetailView).setProgressIndicator(true);
+                return Observable.just(null);
+            }
+        });
+
         // When loading of a note is requested with an invalid note ID.
         mNotesDetailsPresenter.openNote(INVALID_ID);
 
-        // Then note with invalid id is attempted to load from model, callback is captured and
-        // progress indicator is shown.
-        verify(mNoteDetailView).setProgressIndicator(true);
-        verify(mNotesRepository).getNote(eq(INVALID_ID), mGetNoteCallbackCaptor.capture());
+        // Then note with invalid id is attempted to load from model
+        verify(mNotesRepository).getNote(eq(INVALID_ID));
 
         // When note is finally loaded
-        mGetNoteCallbackCaptor.getValue().onNoteLoaded(null); // Trigger callback
-
         // Then progress indicator is hidden and missing note UI is shown
         verify(mNoteDetailView).setProgressIndicator(false);
         verify(mNoteDetailView).showMissingNote();

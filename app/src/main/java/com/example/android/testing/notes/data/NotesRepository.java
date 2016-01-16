@@ -20,27 +20,18 @@ import android.support.annotation.NonNull;
 
 import java.util.List;
 
+import rx.Observable;
+
 /**
  * Main entry point for accessing notes data.
  */
 public interface NotesRepository {
 
-    interface LoadNotesCallback {
+    Observable<List<Note>> getNotes();
 
-        void onNotesLoaded(List<Note> notes);
-    }
+    Observable<Note> getNote(@NonNull String noteId);
 
-    interface GetNoteCallback {
-
-        void onNoteLoaded(Note note);
-    }
-
-    void getNotes(@NonNull LoadNotesCallback callback);
-
-    void getNote(@NonNull String noteId, @NonNull GetNoteCallback callback);
-
-    void saveNote(@NonNull Note note);
+    Observable<Note> saveNote(@NonNull Note note);
 
     void refreshData();
-
 }

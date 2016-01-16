@@ -16,7 +16,11 @@
 
 package com.example.android.testing.notes.data;
 
+import android.support.annotation.NonNull;
+
 import java.util.List;
+
+import rx.Observable;
 
 /**
  * Defines an interface to the service API that is used by this application. All data request should
@@ -24,14 +28,9 @@ import java.util.List;
  */
 public interface NotesServiceApi {
 
-    interface NotesServiceCallback<T> {
+    Observable<List<Note>> getAllNotes();
 
-        void onLoaded(T notes);
-    }
+    Observable<Note> getNote(String noteId);
 
-    void getAllNotes(NotesServiceCallback<List<Note>> callback);
-
-    void getNote(String noteId, NotesServiceCallback<Note> callback);
-
-    void saveNote(Note note);
+    Observable<Note> saveNote(@NonNull Note note);
 }

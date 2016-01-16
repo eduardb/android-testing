@@ -23,6 +23,10 @@ import com.example.android.testing.notes.data.NotesRepository;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import rx.Observer;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -48,20 +52,32 @@ public class NoteDetailPresenter extends RxPresenter<NoteDetailContract.View>
         }
 
         getView().setProgressIndicator(true);
-        mNotesRepository.getNote(noteId, new NotesRepository.GetNoteCallback() {
-            @Override
-            public void onNoteLoaded(Note note) {
-                getView().setProgressIndicator(false);
-                if (null == note) {
-                    getView().showMissingNote();
-                } else {
-                    showNote(note);
-                }
-            }
-        });
+        mNotesRepository
+                .getNote(noteId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Note>() {
+                    @Override
+                    public void onCompleted() {
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                    }
+
+                    @Override
+                    public void onNext(Note note) {
+                        getView().setProgressIndicator(false);
+                        if (null == note) {
+                            getView().showMissingNote();
+                        } else {
+                            showNote(note);
+                        }
+                    }
+                });
     }
 
-    private void showNote(Note note) {
+    protected void showNote(Note note) {
         String title = note.getTitle();
         String description = note.getDescription();
         String imageUrl = note.getImageUrl();

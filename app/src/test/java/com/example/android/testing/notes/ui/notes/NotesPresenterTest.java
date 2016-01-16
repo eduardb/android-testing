@@ -16,47 +16,42 @@
 
 package com.example.android.testing.notes.ui.notes;
 
-import com.google.common.collect.Lists;
-
+import com.example.android.testing.notes.util.RxBaseTest;
 import com.example.android.testing.notes.data.Note;
 import com.example.android.testing.notes.data.NotesRepository;
-import com.example.android.testing.notes.data.NotesRepository.LoadNotesCallback;
+import com.google.common.collect.Lists;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.Matchers.any;
+import rx.Observable;
+
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for the implementation of {@link NotesPresenter}
  */
-public class NotesPresenterTest {
+public class NotesPresenterTest extends RxBaseTest {
 
-    private static List<Note> NOTES = Lists.newArrayList(new Note("Title1", "Description1"),
+    protected static List<Note> NOTES = Lists.newArrayList(new Note("Title1", "Description1"),
             new Note("Title2", "Description2"));
 
-    private static List<Note> EMPTY_NOTES = new ArrayList<>(0);
+    protected static List<Note> EMPTY_NOTES = new ArrayList<>(0);
 
     @Mock
-    private NotesRepository mNotesRepository;
+    protected NotesRepository mNotesRepository;
 
     @Mock
-    private NotesContract.View mNotesView;
-
-    /**
-     * {@link ArgumentCaptor} is a powerful Mockito API to capture argument values and use them to
-     * perform further actions or assertions on them.
-     */
-    @Captor
-    private ArgumentCaptor<LoadNotesCallback> mLoadNotesCallbackCaptor;
+    protected NotesContract.View mNotesView;
 
     private NotesPresenter mNotesPresenter;
 
@@ -72,13 +67,19 @@ public class NotesPresenterTest {
 
     @Test
     public void loadNotesFromRepositoryAndLoadIntoView() {
+        // Mocked repository will return stubbed notes
+        when(mNotesRepository.getNotes()).then(new Answer<Observable<List<Note>>>() {
+            @Override
+            public Observable<List<Note>> answer(InvocationOnMock invocation) throws Throwable {
+                verify(mNotesRepository).refreshData();
+                verify(mNotesView).setProgressIndicator(true);
+                return Observable.just(NOTES);
+            }
+        });
+
         // Given an initialized NotesPresenter with initialized notes
         // When loading of Notes is requested
         mNotesPresenter.loadNotes(true);
-
-        // Callback is captured and invoked with stubbed notes
-        verify(mNotesRepository).getNotes(mLoadNotesCallbackCaptor.capture());
-        mLoadNotesCallbackCaptor.getValue().onNotesLoaded(NOTES);
 
         // Then progress indicator is hidden and notes are shown in UI
         verify(mNotesView).setProgressIndicator(false);
@@ -103,6 +104,6 @@ public class NotesPresenterTest {
         mNotesPresenter.openNoteDetails(requestedNote);
 
         // Then note detail UI is shown
-        verify(mNotesView).showNoteDetailUi(any(String.class));
+        verify(mNotesView).showNoteDetailUi(requestedNote.getId());
     }
 }

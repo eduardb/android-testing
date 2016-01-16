@@ -16,44 +16,71 @@
 
 package com.example.android.testing.notes.data;
 
-import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v4.util.ArrayMap;
+
+import com.fernandocejas.frodo.annotation.RxLogObservable;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import rx.Observable;
+import rx.Subscriber;
 
 /**
  * Implementation of the Notes Service API that adds a latency simulating network.
  */
 public class NotesServiceApiImpl implements NotesServiceApi {
 
-    private static final int SERVICE_LATENCY_IN_MILLIS = 2000;
-    private static final ArrayMap<String, Note> NOTES_SERVICE_DATA =
+    protected static final int SERVICE_LATENCY_IN_MILLIS = 2000;
+    protected static final ArrayMap<String, Note> NOTES_SERVICE_DATA =
             NotesServiceApiEndpoint.loadPersistedNotes();
 
+    @RxLogObservable
     @Override
-    public void getAllNotes(final NotesServiceCallback callback) {
+    public Observable<List<Note>> getAllNotes() {
         // Simulate network by delaying the execution.
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
+        return Observable.create(new Observable.OnSubscribe<List<Note>>() {
             @Override
-            public void run() {
-                List<Note> notes = new ArrayList<>(NOTES_SERVICE_DATA.values());
-                callback.onLoaded(notes);
+            public void call(Subscriber<? super List<Note>> subscriber) {
+                try {
+                    Thread.sleep(SERVICE_LATENCY_IN_MILLIS);
+                } catch (InterruptedException e) {
+                    subscriber.onError(e);
+                }
+                subscriber.onNext(new ArrayList<>(NOTES_SERVICE_DATA.values()));
+                subscriber.onCompleted();
             }
-        }, SERVICE_LATENCY_IN_MILLIS);
+        });
     }
 
+    @RxLogObservable
     @Override
-    public void getNote(final String noteId, final NotesServiceCallback callback) {
-        //TODO: Add network latency here too.
-        Note note = NOTES_SERVICE_DATA.get(noteId);
-        callback.onLoaded(note);
+    public Observable<Note> getNote(final String noteId) {
+        return Observable.create(new Observable.OnSubscribe<Note>() {
+            @Override
+            public void call(Subscriber<? super Note> subscriber) {
+                try {
+                    Thread.sleep(SERVICE_LATENCY_IN_MILLIS);
+                } catch (InterruptedException e) {
+                    subscriber.onError(e);
+                }
+                subscriber.onNext(NOTES_SERVICE_DATA.get(noteId));
+                subscriber.onCompleted();
+            }
+        });
     }
 
+    @RxLogObservable
     @Override
-    public void saveNote(Note note) {
-        NOTES_SERVICE_DATA.put(note.getId(), note);
+    public Observable<Note> saveNote(@NonNull final Note note) {
+        return Observable.create(new Observable.OnSubscribe<Note>() {
+            @Override
+            public void call(Subscriber<? super Note> subscriber) {
+                NOTES_SERVICE_DATA.put(note.getId(), note);
+                subscriber.onNext(note);
+                subscriber.onCompleted();
+            }
+        });
     }
-
 }

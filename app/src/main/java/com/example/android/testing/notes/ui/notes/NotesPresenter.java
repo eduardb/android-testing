@@ -25,6 +25,10 @@ import android.support.annotation.NonNull;
 
 import java.util.List;
 
+import rx.Observer;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 
@@ -54,14 +58,26 @@ public class NotesPresenter extends RxPresenter<NotesContract.View>
         // that the app is busy until the response is handled.
         EspressoIdlingResource.increment(); // App is busy until further notice
 
-        mNotesRepository.getNotes(new NotesRepository.LoadNotesCallback() {
-            @Override
-            public void onNotesLoaded(List<Note> notes) {
-                EspressoIdlingResource.decrement(); // Set app as idle.
-                getView().setProgressIndicator(false);
-                getView().showNotes(notes);
-            }
-        });
+        mNotesRepository
+                .getNotes()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<List<Note>>() {
+                    @Override
+                    public void onCompleted() {
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                    }
+
+                    @Override
+                    public void onNext(List<Note> notes) {
+                        EspressoIdlingResource.decrement(); // Set app as idle.
+                        getView().setProgressIndicator(false);
+                        getView().showNotes(notes);
+                    }
+                });
     }
 
     @Override

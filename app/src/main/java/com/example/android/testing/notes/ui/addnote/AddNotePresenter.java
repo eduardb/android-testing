@@ -27,6 +27,10 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import rx.Observer;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -60,8 +64,24 @@ public class AddNotePresenter extends RxPresenter<AddNoteContract.View>
         if (newNote.isEmpty()) {
             getView().showEmptyNoteError();
         } else {
-            mNotesRepository.saveNote(newNote);
-            getView().showNotesList();
+            mNotesRepository
+                    .saveNote(newNote)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<Note>() {
+                        @Override
+                        public void onCompleted() {
+                            getView().showNotesList();
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                        }
+
+                        @Override
+                        public void onNext(Note note) {
+                        }
+                    });
         }
     }
 
